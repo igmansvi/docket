@@ -20,20 +20,22 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   void login() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      final response = await _authService.login(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-      if (response.user != null) {
-        Navigator.pushReplacementNamed(context, '/dashboard');
-      } else {
-        showDialog(
-          context: context,
-          builder: (context) =>
-              Alert(message: response.toString(), type: AlertType.error),
+    try {
+      if (_formKey.currentState?.validate() ?? false) {
+        final response = await _authService.login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
         );
+        if (response.user != null) {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        } else {}
       }
+    } catch (e) {
+      showDialog(
+        context: context,
+        builder: (context) =>
+            Alert(message: e.toString(), type: AlertType.error),
+      );
     }
   }
 

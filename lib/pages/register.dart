@@ -31,22 +31,24 @@ class _RegisterPageState extends State<RegisterPage> {
   ];
 
   void register() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      final response = await _authService.register(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-        name: _nameController.text.trim(),
-        role: _selectedRole ?? '',
-      );
-      if (response.user != null) {
-        Navigator.pushReplacementNamed(context, '/dashboard');
-      } else {
-        showDialog(
-          context: context,
-          builder: (context) =>
-              Alert(message: response.toString(), type: AlertType.error),
+    try {
+      if (_formKey.currentState?.validate() ?? false) {
+        final response = await _authService.register(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+          name: _nameController.text.trim(),
+          role: _selectedRole ?? '',
         );
+        if (response.user != null) {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        } else {}
       }
+    } catch (e) {
+      showDialog(
+        context: context,
+        builder: (context) =>
+            Alert(message: e.toString(), type: AlertType.error),
+      );
     }
   }
 
