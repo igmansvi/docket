@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:docket/pages/create-notesheet.dart';
+import 'package:docket/pages/view-notesheet.dart';
 
 class DashboardDrawer extends StatelessWidget {
   final VoidCallback? onClose;
@@ -47,12 +49,24 @@ class DashboardDrawer extends StatelessWidget {
           _DrawerMenuItem(
             icon: Icons.note_add_outlined,
             label: 'Create Notesheet',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const CreateNotesheetPage(),
+                ),
+              );
+            },
           ),
           _DrawerMenuItem(
             icon: Icons.description_outlined,
             label: 'View Notesheet',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const ViewNotesheetPage(),
+                ),
+              );
+            },
           ),
           _DrawerMenuItem(
             icon: Icons.settings_outlined,

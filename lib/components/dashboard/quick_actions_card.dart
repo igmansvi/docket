@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:docket/pages/create-notesheet.dart';
+import 'package:docket/pages/view-notesheet.dart';
 
 class QuickActionsCard extends StatelessWidget {
   const QuickActionsCard({super.key});
@@ -35,7 +37,13 @@ class QuickActionsCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const CreateNotesheetPage(),
+                  ),
+                );
+              },
               child: const Text('New Notesheet'),
             ),
           ),
@@ -57,7 +65,13 @@ class QuickActionsCard extends StatelessWidget {
           const SizedBox(height: 12),
           Center(
             child: TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ViewNotesheetPage(),
+                  ),
+                );
+              },
               child: const Text('View Reports'),
             ),
           ),
