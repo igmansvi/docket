@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:docket/services/auth/auth_service.dart';
+
+final AuthService _authService = AuthService();
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -19,7 +22,12 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  final List<String> _roles = ['Student', 'Faculty', 'Coordinator', 'HOD'];
+  final List<String> _roles = [
+    'Student',
+    'Faculty',
+    'Coordinator',
+    'Head Of Department',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -204,12 +212,35 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           if (_formKey.currentState?.validate() ?? false) {
-                            // registration logic
+                            await _authService.register(
+                              email: _emailController.text.trim(),
+                              password: _passwordController.text.trim(),
+                              name: _nameController.text.trim(),
+                              role: _selectedRole ?? '',
+                            );
                           }
                         },
                       ),
+                    ),
+                    _gap(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Already have an account? "),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushReplacementNamed(context, '/login');
+                          },
+                          child: const Text(
+                            "Login",
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

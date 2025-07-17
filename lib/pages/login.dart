@@ -1,4 +1,7 @@
+import 'package:docket/services/auth/auth_service.dart';
 import 'package:flutter/material.dart';
+
+final AuthService _authService = AuthService();
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,6 +15,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _rememberMe = false;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -48,12 +53,11 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     _gap(),
                     TextFormField(
+                      controller: _emailController,
                       validator: (value) {
-                        // add email validation
                         if (value == null || value.isEmpty) {
                           return 'Please enter some text';
                         }
-
                         bool emailValid = RegExp(
                           r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
                         ).hasMatch(value);
@@ -71,11 +75,11 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     _gap(),
                     TextFormField(
+                      controller: _passwordController,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter some text';
                         }
-
                         if (value.length < 6) {
                           return 'Password must be at least 6 characters';
                         }
@@ -134,12 +138,36 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           if (_formKey.currentState?.validate() ?? false) {
-                            /// do something
+                            await _authService.login(
+                              email: _emailController.text.trim(),
+                              password: _passwordController.text.trim(),
+                            );
                           }
                         },
                       ),
+                    ),
+                    _gap(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Don't have an account? "),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushReplacementNamed(
+                              context,
+                              '/register',
+                            );
+                          },
+                          child: const Text(
+                            "Register",
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
