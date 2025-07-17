@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:docket/services/auth/auth_gate.dart';
 
-void main() {
-  runApp(const MainApp());
+Future<void> main() async {
+  await dotenv.load(fileName: '.env.local');
+  await Supabase.initialize(
+    url: dotenv.env['BASE_URL']!,
+    anonKey: dotenv.env['API_KEY']!,
+  );
+  runApp(MainApp());
 }
 
 class MainApp extends StatelessWidget {
@@ -10,11 +18,8 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+      debugShowCheckedModeBanner: false,
+      home: AuthGate(),
     );
   }
 }

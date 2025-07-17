@@ -1,7 +1,12 @@
 name: docket
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
+
+flutter:
+  assets:
+    - .env.local
+  uses-material-design: true
 
 environment:
   sdk: ^3.8.1
@@ -9,12 +14,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_dotenv: ^5.2.1
   supabase_flutter: ^2.9.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-
-flutter:
-  uses-material-design: true
