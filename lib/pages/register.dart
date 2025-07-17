@@ -29,6 +29,20 @@ class _RegisterPageState extends State<RegisterPage> {
     'Head Of Department',
   ];
 
+  void register() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      final response = await _authService.register(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        name: _nameController.text.trim(),
+        role: _selectedRole ?? '',
+      );
+      if (response.user != null) {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -202,6 +216,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
+                        onPressed: register,
                         child: const Padding(
                           padding: EdgeInsets.all(10.0),
                           child: Text(
@@ -212,16 +227,6 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                         ),
-                        onPressed: () async {
-                          if (_formKey.currentState?.validate() ?? false) {
-                            await _authService.register(
-                              email: _emailController.text.trim(),
-                              password: _passwordController.text.trim(),
-                              name: _nameController.text.trim(),
-                              role: _selectedRole ?? '',
-                            );
-                          }
-                        },
                       ),
                     ),
                     _gap(),

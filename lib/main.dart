@@ -6,7 +6,7 @@ import 'package:docket/pages/login.dart';
 import 'package:docket/pages/register.dart';
 
 Future<void> main() async {
-  await dotenv.load(fileName: '.env.local');
+  await dotenv.load(fileName: '.env');
   await Supabase.initialize(
     url: dotenv.env['BASE_URL']!,
     anonKey: dotenv.env['API_KEY']!,
@@ -21,7 +21,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/dashboard',
+      initialRoute: '/login',
       routes: {
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),

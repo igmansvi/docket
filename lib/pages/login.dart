@@ -18,6 +18,18 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  void login() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      final response = await _authService.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+      if (response.user != null) {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,6 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
+                        onPressed: login,
                         child: const Padding(
                           padding: EdgeInsets.all(10.0),
                           child: Text(
@@ -138,14 +151,6 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                         ),
-                        onPressed: () async {
-                          if (_formKey.currentState?.validate() ?? false) {
-                            await _authService.login(
-                              email: _emailController.text.trim(),
-                              password: _passwordController.text.trim(),
-                            );
-                          }
-                        },
                       ),
                     ),
                     _gap(),

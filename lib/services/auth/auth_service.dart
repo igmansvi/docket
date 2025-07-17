@@ -28,7 +28,7 @@ class AuthService {
     return response;
   }
 
-  Future<void> logoutt() async {
+  Future<void> logout() async {
     await _client.auth.signOut();
   }
 
@@ -40,8 +40,41 @@ class AuthService {
     required String name,
     required String role,
   }) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) {
+      throw Exception('User not logged in. Cannot update profile.');
+    }
+
     await _client.auth.updateUser(
       UserAttributes(data: {'name': name, 'role': role}),
     );
+
+    await _client
+        .from('users')
+        .update({'name': name, 'role': role})
+        .eq('id', userId);
+  }
+
+  Future<Map<String, dynamic>?> getUserProfile() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) {
+      return null;
+    }
+
+    try {
+      final response = await _client
+          .from('users')
+          .select('name, role, email')
+          .eq('id', userId)
+          .single();
+
+      return response;
+    } on PostgrestException catch (e) {
+      print('Error fetching user profile: ${e.message}');
+      return null;
+    } catch (e) {
+      print('An unexpected error occurred while fetching user profile: $e');
+      return null;
+    }
   }
 }

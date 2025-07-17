@@ -5,7 +5,7 @@ version: 0.1.0
 
 flutter:
   assets:
-    - .env.local
+    - .env
   uses-material-design: true
 
 environment:
