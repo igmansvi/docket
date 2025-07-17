@@ -1,5 +1,6 @@
-import 'package:docket/services/auth/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:docket/components/ui/alert.dart';
+import 'package:docket/services/auth/auth_service.dart';
 
 final AuthService _authService = AuthService();
 
@@ -26,6 +27,12 @@ class _LoginPageState extends State<LoginPage> {
       );
       if (response.user != null) {
         Navigator.pushReplacementNamed(context, '/dashboard');
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) =>
+              Alert(message: response.toString(), type: AlertType.error),
+        );
       }
     }
   }
