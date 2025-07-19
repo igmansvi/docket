@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/notesheet/notesheet_service.dart';
 
 class CreateNotesheetPage extends StatefulWidget {
   const CreateNotesheetPage({super.key});
@@ -18,13 +20,55 @@ class _CreateNotesheetPageState extends State<CreateNotesheetPage> {
   final TextEditingController _budgetController = TextEditingController();
   final TextEditingController _expectedController = TextEditingController();
   final TextEditingController _requirementsController = TextEditingController();
-  final TextEditingController _reviewersController = TextEditingController();
+  // final TextEditingController _reviewersController = TextEditingController();
   final TextEditingController _attachmentsController = TextEditingController();
 
   String? _selectedVenue;
   String? _selectedClub;
   List<String> _reviewers = [];
   DateTime? _selectedDate;
+
+  List<Map<String, dynamic>> _allReviewers = [];
+  bool _loadingReviewers = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchReviewers();
+  }
+
+  Future<void> _fetchReviewers() async {
+    setState(() {
+      _loadingReviewers = true;
+    });
+    final client = Supabase.instance.client;
+    final response = await client.from('users').select('id, name, role');
+    setState(() {
+      _allReviewers = List<Map<String, dynamic>>.from(response);
+      _loadingReviewers = false;
+    });
+  }
+
+  Future<void> _submitNotesheet({required String status}) async {
+    final service = NotesheetService();
+    await service.createNotesheet(
+      title: _eventTitleController.text,
+      eventDate: _selectedDate ?? DateTime.now(),
+      venue: _selectedVenue ?? '',
+      venueDetails: _venueController.text,
+      guests: _guestsController.text,
+      clubName: _selectedClub ?? '',
+      clubDetails: _clubController.text,
+      estimatedBudget: double.tryParse(_budgetController.text),
+      expectedGathering: int.tryParse(_expectedController.text),
+      requirements: _requirementsController.text,
+      reviewerIds: _reviewers,
+      attachmentUrls: _attachmentsController.text.isNotEmpty
+          ? _attachmentsController.text.split(',')
+          : [],
+    );
+    if (mounted) Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -267,31 +311,53 @@ class _CreateNotesheetPageState extends State<CreateNotesheetPage> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            TextFormField(
-                              controller: _reviewersController,
-                              decoration: const InputDecoration(
-                                labelText: 'Reviewers (comma separated)',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.verified_user_outlined),
-                              ),
-                              onChanged: (val) {
-                                setState(() {
-                                  _reviewers = val
-                                      .split(',')
-                                      .map((e) => e.trim())
-                                      .where((e) => e.isNotEmpty)
-                                      .toList();
-                                });
-                              },
-                            ),
+                            _loadingReviewers
+                                ? const CircularProgressIndicator()
+                                : DropdownButtonFormField<String>(
+                                    isExpanded: true,
+                                    items: _allReviewers
+                                        .map(
+                                          (r) => DropdownMenuItem<String>(
+                                            value: r['id'] as String,
+                                            child: Text(r['name'] ?? r['id']),
+                                          ),
+                                        )
+                                        .toList(),
+                                    onChanged: (val) {
+                                      if (val != null &&
+                                          !_reviewers.contains(val)) {
+                                        setState(() {
+                                          _reviewers.add(val);
+                                        });
+                                      }
+                                    },
+                                    decoration: const InputDecoration(
+                                      labelText: 'Add Reviewer',
+                                      border: OutlineInputBorder(),
+                                      prefixIcon: Icon(
+                                        Icons.verified_user_outlined,
+                                      ),
+                                    ),
+                                  ),
                             if (_reviewers.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: Wrap(
                                   spacing: 8,
-                                  children: _reviewers
-                                      .map((r) => Chip(label: Text(r)))
-                                      .toList(),
+                                  children: _reviewers.map((id) {
+                                    final user = _allReviewers.firstWhere(
+                                      (u) => u['id'] == id,
+                                      orElse: () => {'name': id},
+                                    );
+                                    return Chip(
+                                      label: Text(user['name'] ?? id),
+                                      onDeleted: () {
+                                        setState(() {
+                                          _reviewers.remove(id);
+                                        });
+                                      },
+                                    );
+                                  }).toList(),
                                 ),
                               ),
                             const SizedBox(height: 16),
@@ -313,7 +379,9 @@ class _CreateNotesheetPageState extends State<CreateNotesheetPage> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       OutlinedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          _submitNotesheet(status: 'draft');
+                        },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.blue[700],
                           side: BorderSide(color: Colors.blue[700]!),
@@ -326,7 +394,9 @@ class _CreateNotesheetPageState extends State<CreateNotesheetPage> {
                       ),
                       const SizedBox(width: 16),
                       ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          _submitNotesheet(status: 'pending_level_1');
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue[700],
                           padding: const EdgeInsets.symmetric(
