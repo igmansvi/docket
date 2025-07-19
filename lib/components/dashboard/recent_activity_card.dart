@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class RecentActivityCard extends StatelessWidget {
-  const RecentActivityCard({super.key});
+  final List<Map<String, dynamic>> activities;
+  const RecentActivityCard({super.key, this.activities = const []});
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +28,13 @@ class RecentActivityCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _ActivityRow('Recently Updated', 'Notesheet', '507'),
-          _ActivityRow('Sur Nojsheet', '', '407'),
-          _ActivityRow('Surr Nojsheet', '', '307'),
+          if (activities.isEmpty) const Text('No recent activity.'),
+          for (final activity in activities)
+            _ActivityRow(
+              activity['comment_text'] ?? '',
+              activity['user_id'] ?? '',
+              activity['created_at']?.toString() ?? '',
+            ),
         ],
       ),
     );

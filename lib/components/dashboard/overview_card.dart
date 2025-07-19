@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class OverviewCard extends StatelessWidget {
-  const OverviewCard({super.key});
+  final Map<String, dynamic>? notesheet;
+  final List<String> reviewers;
+  const OverviewCard({super.key, this.notesheet, this.reviewers = const []});
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,13 @@ class OverviewCard extends StatelessWidget {
               _LegendDot(color: Colors.red, label: 'Rejected'),
             ],
           ),
+          const SizedBox(height: 16),
+          if (notesheet != null) ...[
+            Text('Venue: ${notesheet!['venue'] ?? '-'}'),
+            Text('Event Date: ${notesheet!['event_date'] ?? '-'}'),
+            Text('Club: ${notesheet!['club_name'] ?? '-'}'),
+            Text('Reviewers: ${reviewers.join(', ')}'),
+          ],
         ],
       ),
     );

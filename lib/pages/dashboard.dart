@@ -1,30 +1,72 @@
 import 'package:flutter/material.dart';
+
 import '../components/dashboard/dashboard_drawer.dart';
 import '../components/dashboard/profile_panel.dart';
 import '../components/dashboard/overview_card.dart';
 import '../components/dashboard/recent_activity_card.dart';
 import '../components/dashboard/quick_actions_card.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/notesheet/notesheet_service.dart';
+import '../services/review/review_service.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
 
   @override
-  State<Dashboard> createState() => _DashboardState();
+  _DashboardState createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
   bool _drawerOpen = false;
   bool _profileOpen = false;
   bool _loading = true;
+  List<Map<String, dynamic>> _notesheets = [];
+  Map<String, List<Map<String, dynamic>>> _recentActivities = {};
+  Map<String, List<String>> _reviewers = {};
+  final NotesheetService _notesheetService = NotesheetService();
+  final ReviewService _reviewService = ReviewService();
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 1), () {
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    setState(() {
+      _loading = true;
+    });
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id ?? '';
+      final notesheets = await _notesheetService.getNotesheetsForUser(userId);
+      notesheets.sort((a, b) {
+        final aDate =
+            DateTime.tryParse(a['event_date'] ?? '') ?? DateTime(1970);
+        final bDate =
+            DateTime.tryParse(b['event_date'] ?? '') ?? DateTime(1970);
+        return bDate.compareTo(aDate);
+      });
+      final Map<String, List<Map<String, dynamic>>> activitiesMap = {};
+      final Map<String, List<String>> reviewersMap = {};
+      for (final n in notesheets.take(3)) {
+        final id = n['id']?.toString() ?? '';
+        if (id.isEmpty) continue;
+        final activities = await _reviewService.getCommentsForNotesheet(id);
+        final reviewers = await _notesheetService.getReviewersForNotesheet(id);
+        activitiesMap[id] = activities;
+        reviewersMap[id] = reviewers;
+      }
+      setState(() {
+        _notesheets = notesheets;
+        _recentActivities = activitiesMap;
+        _reviewers = reviewersMap;
+        _loading = false;
+      });
+    } catch (e) {
       setState(() {
         _loading = false;
       });
-    });
+    }
   }
 
   @override
@@ -72,7 +114,12 @@ class _DashboardState extends State<Dashboard> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Dr. Alex Sharma',
+                                  _notesheets.isNotEmpty &&
+                                          _notesheets
+                                                  .first['created_by_name'] !=
+                                              null
+                                      ? _notesheets.first['created_by_name']
+                                      : 'User',
                                   style: TextStyle(
                                     color: Colors.blue[900],
                                     fontWeight: FontWeight.w600,
@@ -103,48 +150,40 @@ class _DashboardState extends State<Dashboard> {
                               ),
                               child: LayoutBuilder(
                                 builder: (context, constraints) {
-                                  return Flex(
-                                    direction: isWide
-                                        ? Axis.horizontal
-                                        : Axis.vertical,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                  return ListView(
                                     children: [
-                                      Expanded(
-                                        flex: 2,
-                                        child: Column(
+                                      for (final n in _notesheets.take(3)) ...[
+                                        Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
                                             const SizedBox(height: 8),
-                                            const Text(
-                                              'Notesheet Overview',
-                                              style: TextStyle(
+                                            Text(
+                                              n['title'] ??
+                                                  'Notesheet Overview',
+                                              style: const TextStyle(
                                                 fontSize: 22,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.blue,
                                               ),
                                             ),
                                             const SizedBox(height: 16),
-                                            OverviewCard(),
+                                            OverviewCard(
+                                              notesheet: n,
+                                              reviewers:
+                                                  _reviewers[n['id']] ?? [],
+                                            ),
                                             const SizedBox(height: 24),
-                                            RecentActivityCard(),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: isWide ? 32 : 0,
-                                        height: isWide ? 0 : 32,
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Column(
-                                          children: [
+                                            RecentActivityCard(
+                                              activities:
+                                                  _recentActivities[n['id']] ??
+                                                  [],
+                                            ),
                                             const SizedBox(height: 8),
                                             QuickActionsCard(),
                                           ],
                                         ),
-                                      ),
+                                      ],
                                     ],
                                   );
                                 },

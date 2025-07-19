@@ -3,7 +3,8 @@ import 'package:docket/pages/create-notesheet.dart';
 import 'package:docket/pages/view-notesheet.dart';
 
 class QuickActionsCard extends StatelessWidget {
-  const QuickActionsCard({super.key});
+  final String? notesheetId;
+  const QuickActionsCard({super.key, this.notesheetId});
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +69,7 @@ class QuickActionsCard extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => const ViewNotesheetPage(),
+                    builder: (context) => ViewNotesheetPage(notesheetId: notesheetId ?? ' ',),
                   ),
                 );
               },

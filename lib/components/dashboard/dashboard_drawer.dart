@@ -4,7 +4,8 @@ import 'package:docket/pages/view-notesheet.dart';
 
 class DashboardDrawer extends StatelessWidget {
   final VoidCallback? onClose;
-  const DashboardDrawer({super.key, this.onClose});
+  final String? notesheetId;
+  const DashboardDrawer({super.key, this.onClose, this.notesheetId});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +64,8 @@ class DashboardDrawer extends StatelessWidget {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const ViewNotesheetPage(),
+                  builder: (context) =>
+                      ViewNotesheetPage(notesheetId: notesheetId ?? ''),
                 ),
               );
             },
