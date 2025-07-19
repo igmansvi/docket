@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:docket/services/auth/auth_gate.dart';
+
 import 'package:docket/pages/login.dart';
 import 'package:docket/pages/register.dart';
+import 'package:docket/pages/review.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: '.env');
@@ -26,6 +28,7 @@ class MainApp extends StatelessWidget {
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),
         '/dashboard': (context) => AuthGate(),
+        '/review': (context) => const ReviewPage(),
       },
     );
   }

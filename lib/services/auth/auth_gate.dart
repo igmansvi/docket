@@ -3,6 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:docket/components/ui/loading.dart';
 import 'package:docket/pages/login.dart';
 import 'package:docket/pages/dashboard.dart';
+import 'package:docket/pages/review.dart';
+import 'package:docket/services/auth/auth_service.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -42,8 +44,23 @@ class _AuthGateState extends State<AuthGate> {
   Widget build(BuildContext context) {
     if (_isLoadingSession) {
       return Loading();
+    } else if (_session != null) {
+      return FutureBuilder<Map<String, dynamic>?>(
+        future: AuthService().getUserProfile(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Loading();
+          }
+          final role = snapshot.data?['role'];
+          if (role == 'student') {
+            return Dashboard();
+          } else {
+            return ReviewPage();
+          }
+        },
+      );
     } else {
-      return _session != null ? Dashboard() : LoginPage();
+      return LoginPage();
     }
   }
 }
