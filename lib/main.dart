@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:docket/config/config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:docket/themes/theme_provider.dart';
@@ -16,8 +17,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   await Supabase.initialize(
-    url: dotenv.env['BASE_URL']!,
-    anonKey: dotenv.env['API_KEY']!,
+    url: AppConfig.supabaseUrl.isNotEmpty
+        ? AppConfig.supabaseUrl
+        : dotenv.env['SUPABASE_URL']!,
+    anonKey: AppConfig.supabaseKey.isNotEmpty
+        ? AppConfig.supabaseKey
+        : dotenv.env['SUPABASE_KEY']!,
   );
   runApp(
     ChangeNotifierProvider(
